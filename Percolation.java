@@ -96,7 +96,7 @@ public class Percolation {
         // return this.isFullArray[p];
 
         for (int i = 0; i < this.gridSize; i++) {
-            if (this.siteGrid.connected(p, i)) {
+            if (isOpen(1, i + 1) && this.siteGrid.connected(p, i)) {
                 return true;
             }
         }
@@ -126,7 +126,7 @@ public class Percolation {
         // return this.isFullArray[p];
 
         for (int i = 0; i < this.gridSize; i++) {
-            if (this.siteGrid.connected(p, i)) {
+            if (isOpen(1, i + 1) && this.siteGrid.connected(p, i)) {
                 return true;
             }
         }
