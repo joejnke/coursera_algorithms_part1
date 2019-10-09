@@ -43,34 +43,34 @@ public class Percolation {
 
             // create connection with neighbouring open sites.
             if (!(row == 1)) {
-                if (isOpen(row - 1, col) && this.compIdArr[this.indexFrom2d(row, col)] != this.compIdArr[this.indexFrom2d(row - 1, col)]) {
+                if (isOpen(row - 1, col)) {
                     siteGrid.union(this.indexFrom2d(row, col), this.indexFrom2d(row - 1, col));
-                    this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
-                    this.compIdArr[this.indexFrom2d(row - 1, col)] = siteGrid.find(this.indexFrom2d(row - 1, col));
+                    // this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
+                    // this.compIdArr[this.indexFrom2d(row - 1, col)] = this.compIdArr[this.indexFrom2d(row, col)];
                 }
             }
 
             if (!(row == this.gridSize)) {
-                if (isOpen(row+1, col) && this.compIdArr[this.indexFrom2d(row, col)] != this.compIdArr[this.indexFrom2d(row + 1, col)]) {
+                if (isOpen(row+1, col)) {
                     siteGrid.union(this.indexFrom2d(row, col), this.indexFrom2d(row+1, col));
-                    this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
-                    this.compIdArr[this.indexFrom2d(row + 1, col)] = siteGrid.find(this.indexFrom2d(row + 1, col));
+                    // this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
+                    // this.compIdArr[this.indexFrom2d(row + 1, col)] = this.compIdArr[this.indexFrom2d(row, col)];
                 }
             }
 
             if (!(col == 1)) {
-                if (isOpen(row, col-1) && this.compIdArr[this.indexFrom2d(row, col)] != this.compIdArr[this.indexFrom2d(row, col - 1)]) {
+                if (isOpen(row, col-1)) {
                     siteGrid.union(this.indexFrom2d(row, col), this.indexFrom2d(row, col-1));
-                    this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
-                    this.compIdArr[this.indexFrom2d(row, col - 1)] = siteGrid.find(this.indexFrom2d(row, col - 1));
+                    // this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
+                    // this.compIdArr[this.indexFrom2d(row, col - 1)] = this.compIdArr[this.indexFrom2d(row, col)];
                 }
             }
 
             if (!(col == this.gridSize)) {
-                if (isOpen(row, col+1) && this.compIdArr[this.indexFrom2d(row, col)] != this.compIdArr[this.indexFrom2d(row, col + 1)]) {
+                if (isOpen(row, col+1)) {
                     siteGrid.union(this.indexFrom2d(row, col), this.indexFrom2d(row, col+1));
-                    this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
-                    this.compIdArr[this.indexFrom2d(row, col + 1)] = siteGrid.find(this.indexFrom2d(row, col + 1));
+                    // this.compIdArr[this.indexFrom2d(row, col)] = siteGrid.find(this.indexFrom2d(row, col));
+                    // this.compIdArr[this.indexFrom2d(row, col + 1)] = this.compIdArr[this.indexFrom2d(row, col)];
                 }
             }
 
@@ -138,9 +138,16 @@ public class Percolation {
         //
         // return this.isFullArray[p];
 
-        for (int i = 0; i < this.gridSize; i++) {
-            if (isOpen(1, i + 1) && this.siteGrid.connected(p, i)) {
-                return true;
+        if (this.isFullArray[p]) {
+            return true;
+        }
+
+        else {
+            for (int i = 0; i < this.gridSize; i++) {
+                if (isOpen(1, i + 1) && this.siteGrid.connected(p, i)) {
+                    this.isFullArray[p] = true;
+                    return true;
+                }
             }
         }
 
