@@ -39,28 +39,28 @@ public class PercolationStats {
                 System.out.println(e.toString());
             }
         }
+        this.mean = StdStats.mean(this.pThreshArray);
+        this.stddev = StdStats.stddev(this.pThreshArray);
     }
 
     // sample mean of percolation threshold
     public double mean() {
-        this.mean = StdStats.mean(this.pThreshArray);
         return this.mean;
     }
 
     // sample standard deviation of percolation threshold
     public double stddev() {
-        this.stddev = StdStats.stddev(this.pThreshArray);
         return this.stddev;
     }
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return this.mean - 1.96E00*(Math.sqrt(stddev/this.t));
+        return this.mean() - 1.96 * (this.stddev() / Math.sqrt(this.t));
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return this.mean + 1.96E00*(Math.sqrt(stddev/this.t));
+        return this.mean() + 1.96 * (this.stddev() / Math.sqrt(this.t));
     }
 
     // test client (see below)
