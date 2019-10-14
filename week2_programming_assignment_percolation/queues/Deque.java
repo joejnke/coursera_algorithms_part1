@@ -13,7 +13,6 @@ public class Deque<Item> implements Iterable<Item> {
         this.n = 0;
         this.first = 0;
         this.last = 0;
-        // this.capacity = 1;
         this.deque = (Item[]) new Object[1];
     }
 
@@ -23,9 +22,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     // return the number of items on the deque
-    public int size() {
-        return this.n;
-    }
+    public int size() { return this.n; }
 
     // resize the array to the given size
     private void resize(int size) {
@@ -201,7 +198,7 @@ public class Deque<Item> implements Iterable<Item> {
         // test the iterator
         System.out.println("############ iterator test ###########");
         Iterator<String> dequeItr = testDeque.iterator();
-        while(dequeItr.hasNext()) {
+        while (dequeItr.hasNext()) {
             System.out.println(dequeItr.next());
         }
 
