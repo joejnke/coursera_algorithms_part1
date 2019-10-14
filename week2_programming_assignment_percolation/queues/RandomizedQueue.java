@@ -32,6 +32,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // add the item
     public void enqueue(Item item) {
+
+        if (item == null) { throw new IllegalArgumentException("null items can't be enqueued..."); }
+
         // if queue is empty
         if (this.isEmpty()) {
             this.randQueue[this.top] = item;
@@ -56,24 +59,34 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // shift every element by one to the left starting from index start and replacing it with the one next to it.
     private void shiftLeft(int start) {
-        Item[] temp = java.util.Arrays.copyOf(this.randQueue, this.randQueue.length);
-        for (int i = start; i < this.n;) { this.randQueue[i] = this.randQueue[++i]; }
-        this.randQueue = temp;
+        for (int i = start; i < this.n; i++) {
+            if (i+1 == this.randQueue.length) { this.randQueue[i] = null; }
+            else  { this.randQueue[i] = this.randQueue[i+1]; }
+        }
     }
 
     // remove and return a random item
     public Item dequeue() {
+        if (this.isEmpty()) { throw new NoSuchElementException("queue is empty..."); }
+
         int randIndex = StdRandom.uniform(this.n);
         Item itemToRemove = this.randQueue[randIndex];
         this.shiftLeft(randIndex);
         this.randQueue[this.n - 1] = null; // set the previous top to null
         this.top--;
         this.n--;
+
+        // shrink the array by half if the number of elements is 1/4th of the array size.
+        if (this.n <= this.randQueue.length / 4 && this.n > 0) {
+            this.resize(this.randQueue.length / 2);
+        }
+
         return itemToRemove;
     }
 
     // return a random item (but do not remove it)
     public Item sample() {
+        if (this.isEmpty()) { throw new NoSuchElementException("queue is empty..."); }
         return this.randQueue[StdRandom.uniform(this.n)];
     }
 
@@ -89,6 +102,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         public boolean hasNext() {
             return this.index != (this.tempRandQueue.length);
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
 
         public Item next() {
@@ -109,7 +126,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         testRandQueue.enqueue("item 1");
         testRandQueue.enqueue("item 2");
         testRandQueue.enqueue("item 3");
-        testRandQueue.dequeue();
+        System.out.println(testRandQueue.dequeue());
         System.out.println("dequeue() working: " + (testRandQueue.size() ==  2));
         System.out.println("size() working: " + (testRandQueue.size() ==  testRandQueue.n));
         testRandQueue.enqueue("item 4");

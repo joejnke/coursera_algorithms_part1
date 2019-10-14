@@ -91,7 +91,7 @@ public class ResizingArrayStack<Item> implements Iterable<Item> {
      * Adds the item to this stack.
      * @param item the item to add
      */
-    public void push (Item item) {
+    public void push(Item item) {
         if (n == a.length) resize(2*a.length);    // double size of array if necessary
         a[n++] = item;                            // add item
     }

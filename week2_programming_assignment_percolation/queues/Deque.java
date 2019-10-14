@@ -32,34 +32,34 @@ public class Deque<Item> implements Iterable<Item> {
 
     // sifht the underlying array holding the elements to the right corner of the same array
     private void shiftRight() {
-        Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
-        for (int j = temp.length-1, i = this.last; j >= 0; i--, j--) {
+        // Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
+        for (int j = this.deque.length-1, i = this.last; j >= 0; i--, j--) {
             if (i >= this.first) {
-                temp[j]	 = this.deque[i];
+                this.deque[j]	 = this.deque[i];
             }
             else {
-                temp[j] = null;
+                this.deque[j] = null;
             }
         }
 
-        this.deque = temp;
+        // this.deque = temp;
         this.first = this.deque.length - this.n;
         this.last = this.deque.length-1;
     }
 
     // sifht the underlying array holding the elements to the left corner of the same array
     private void shiftLeft() {
-        Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
+        // Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
         for (int j = 0, i = this.first; j < this.deque.length; i++, j++) {
             if (i <= this.last) {
-                temp[j]	 = this.deque[i];
+                this.deque[j]	 = this.deque[i];
             }
             else {
-                temp[j] = null;
+                this.deque[j] = null;
             }
         }
 
-        this.deque = temp;
+        // this.deque = temp;
         this.first = 0;
         this.last = this.n - 1;
     }
@@ -163,6 +163,10 @@ public class Deque<Item> implements Iterable<Item> {
         private int remainingItems = n;
         public boolean hasNext() {
             return remainingItems != 0;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
 
         public Item next() {
