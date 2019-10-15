@@ -28,6 +28,15 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private void resize(int size) {
         // alternative implementation suggested on the sample code given
         this.randQueue = java.util.Arrays.copyOf(this.randQueue, size);
+        this.top = this.n - 1;
+    }
+
+    // shift every element by one to the left starting from index start and replacing it with the one next to it.
+    private void shiftLeft(int start) {
+        for (int i = start; i < this.n; i++) {
+            if (i+1 == this.randQueue.length) { this.randQueue[i] = null; }
+            else  { this.randQueue[i] = this.randQueue[i+1]; }
+        }
     }
 
     // add the item
@@ -37,6 +46,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         // if queue is empty
         if (this.isEmpty()) {
+            this.top = 0;
             this.randQueue[this.top] = item;
             this.n++;
         }
@@ -54,14 +64,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             this.top = (this.top + 1) % this.randQueue.length;
             this.randQueue[this.top] = item;
             this.n++;
-        }
-    }
-
-    // shift every element by one to the left starting from index start and replacing it with the one next to it.
-    private void shiftLeft(int start) {
-        for (int i = start; i < this.n; i++) {
-            if (i+1 == this.randQueue.length) { this.randQueue[i] = null; }
-            else  { this.randQueue[i] = this.randQueue[i+1]; }
         }
     }
 

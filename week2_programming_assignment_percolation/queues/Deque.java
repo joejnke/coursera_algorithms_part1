@@ -28,6 +28,8 @@ public class Deque<Item> implements Iterable<Item> {
     private void resize(int size) {
         // alternative implementation suggested on the sample code given
         this.deque = java.util.Arrays.copyOf(this.deque, size);
+        this.first = 0;
+        this.last = this.n - 1;
     }
 
     // sifht the underlying array holding the elements to the right corner of the same array
@@ -35,7 +37,7 @@ public class Deque<Item> implements Iterable<Item> {
         // Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
         for (int j = this.deque.length-1, i = this.last; j >= 0; i--, j--) {
             if (i >= this.first) {
-                this.deque[j]	 = this.deque[i];
+                this.deque[j] = this.deque[i];
             }
             else {
                 this.deque[j] = null;
@@ -52,7 +54,7 @@ public class Deque<Item> implements Iterable<Item> {
         // Item[] temp = java.util.Arrays.copyOf(this.deque, this.deque.length); // to be removed
         for (int j = 0, i = this.first; j < this.deque.length; i++, j++) {
             if (i <= this.last) {
-                this.deque[j]	 = this.deque[i];
+                this.deque[j] = this.deque[i];
             }
             else {
                 this.deque[j] = null;
@@ -66,6 +68,7 @@ public class Deque<Item> implements Iterable<Item> {
 
     // add the item to the front
     public void addFirst(Item item) {
+        if (item == null) throw new IllegalArgumentException("null values not allowed...");
         // if the deque is full, resize the deque before adding item
         if (this.n == this.deque.length) { //(this.first + (this.capacity - 1)) % this.capacity == this.last) {
             this.resize(this.deque.length * 2);
@@ -80,6 +83,7 @@ public class Deque<Item> implements Iterable<Item> {
 
         // if deque is empty, then put the element in the Deque and keep both first and last refere to it.
         else  if (this.isEmpty()) {
+            this.first = this.last;
             this.deque[this.first] = item;
             this.n++;
         }
@@ -97,6 +101,7 @@ public class Deque<Item> implements Iterable<Item> {
 
     // add the item to the back
     public void addLast(Item item) {
+        if (item == null) throw new IllegalArgumentException("null values not allowed...");
         // if the deque is full, resize the deque before adding item
         if (this.n == this.deque.length) { //(this.first + (this.capacity - 1)) % this.capacity == this.last) {
             this.resize(this.deque.length * 2);
@@ -107,6 +112,7 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         else  if (this.isEmpty()) {
+            this.last = this.first;
             this.deque[this.last] = item;
             this.n++;
         }
@@ -132,7 +138,7 @@ public class Deque<Item> implements Iterable<Item> {
         this.first = (this.first + 1) % this.deque.length;
 
         // shrink the array by half if the number of elements is 1/4th of the array size.
-        if (this.n <= this.deque.length / 4 && this.n > 0) {
+        if (this.n == (this.deque.length / 4) && this.n > 0) {
             this.resize(this.deque.length / 2);
         }
 
@@ -150,8 +156,8 @@ public class Deque<Item> implements Iterable<Item> {
         this.last = (this.last + (this.deque.length - 1)) % this.deque.length;
 
         // shrink the array by half if the number of elements is 1/4th of the array size.
-        if (this.n == this.deque.length / 4 && this.n > 0) {
-            this.resize(this.deque.length);
+        if (this.n == (this.deque.length / 4) && this.n > 0) {
+            this.resize(this.deque.length / 2);
         }
 
         return itemToRemove;
@@ -159,10 +165,15 @@ public class Deque<Item> implements Iterable<Item> {
 
     // iterator class
     private class DequeIterator implements Iterator<Item> {
-        private int itFirst = first;
-        private int remainingItems = n;
+        private int itFirst;
+        private int remainingItems;
+
+        public DequeIterator() {
+            this.itFirst = first;
+            this.remainingItems = n;
+        }
         public boolean hasNext() {
-            return remainingItems != 0;
+            return remainingItems > 0;
         }
 
         public void remove() {
@@ -171,8 +182,8 @@ public class Deque<Item> implements Iterable<Item> {
 
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException("already reached the last element...");
-            Item itemToRemove = deque[itFirst];
-            itFirst = (itFirst + 1) % deque.length;
+            Item itemToRemove = deque[itFirst++];
+            // itFirst = (itFirst + 1) % deque.length;
             remainingItems--;
             return itemToRemove;
         }
@@ -199,14 +210,26 @@ public class Deque<Item> implements Iterable<Item> {
             testDeque.addLast("last item " + i);
         }
 
+
         // test the iterator
         System.out.println("############ iterator test ###########");
         Iterator<String> dequeItr = testDeque.iterator();
         while (dequeItr.hasNext()) {
             System.out.println(dequeItr.next());
         }
-
         // for (String s : testDeque) System.out.println(s);
+
+        // System.out.println("remove first....");
+        //
+        // System.out.println(testDeque.removeFirst());
+        // System.out.println("....remove first");
+        //
+        //
+        // while (dequeItr.hasNext()) {
+        //     System.out.println(dequeItr.next());
+        // }
+        // for (String s : testDeque) System.out.println(s);
+
         // System.out.println(testDeque.removeFirst());
         // System.out.println("capacity: " + testDeque.deque.length);
         // test the Deque constructor
