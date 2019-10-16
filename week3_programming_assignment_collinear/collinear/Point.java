@@ -148,7 +148,14 @@ public class Point implements Comparable<Point> {
             pointsList[i] = new Point(Integer.parseInt(pointCoord[0].trim()), Integer.parseInt(pointCoord[1].trim()));
         }
 
-        for (Point p: pointsList) { p.draw(); System.out.println(p.toString()); }
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p: pointsList) {
+            p.draw();
+            System.out.println(p.toString());
+        }
+        StdDraw.show();
 
         System.out.println("########## sort using compareTo() ##########");
         Arrays.sort(pointsList);
@@ -158,6 +165,7 @@ public class Point implements Comparable<Point> {
         for (Point p : pointsList) { System.out.println(p.slopeTo(pointsList[pointsList.length - 1])); }
         Arrays.sort(pointsList, pointsList[pointsList.length - 1 ].slopeOrder());
         for (Point p : pointsList) { System.out.println(p.toString()); p.drawTo(pointsList[pointsList.length - 1]); }
+        StdDraw.show();
 
     }
 }
