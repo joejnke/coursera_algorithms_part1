@@ -8,8 +8,11 @@
  *
  ******************************************************************************/
 
-import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdIn;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class Point implements Comparable<Point> {
 
@@ -60,6 +63,15 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
+        if (this.y == that.y && this.x == that.x ) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        else if (this.x == that.x) {
+            return Double.POSITIVE_INFINITY;
+        }
+
+        else { return (((double) (that.y - this.y)) / (that.x - this.x)); }
     }
 
     /**
@@ -76,8 +88,22 @@ public class Point implements Comparable<Point> {
      */
     public int compareTo(Point that) {
         /* YOUR CODE HERE */
+        if (this.y < that.y || (this.y == that.y && this.x < that.x)) {
+            return -1;
+        }
+
+        else if (this.y == that.y && this.x == that.x) {
+            return 0;
+        }
+
+        else { return 1; }
     }
 
+    // private class BySlope implements Comparator<Point> {
+    //     public int compare(Point first, Point second) {
+    //         if (slopeTo)
+    //     }
+    // }
     /**
      * Compares two points by the slope they make with this point.
      * The slope is defined as in the slopeTo() method.
@@ -86,12 +112,19 @@ public class Point implements Comparable<Point> {
      */
     public Comparator<Point> slopeOrder() {
         /* YOUR CODE HERE */
+        class BySlope implements Comparator<Point> {
+            public int compare(Point first, Point second) {
+                return Double.compare(slopeTo(first), slopeTo(second));
+            }
+        }
+
+        return new BySlope();
     }
 
 
     /**
      * Returns a string representation of this point.
-     * This method is provide for debugging;
+     * This method is provided for debugging;
      * your program should not rely on the format of the string representation.
      *
      * @return a string representation of this point
@@ -106,5 +139,25 @@ public class Point implements Comparable<Point> {
      */
     public static void main(String[] args) {
         /* YOUR CODE HERE */
+        Point[] pointsList = new Point[Integer.parseInt(StdIn.readLine())];
+
+        System.out.println("########## before sort using compareTo() ##########");
+        for (int i = 0; i < pointsList.length; i++) {
+            String[] pointCoord = StdIn.readLine().trim().split(" ", 2);
+            // System.out.println(pointCoord[0] + pointCoord[1].trim() + "end" + pointCoord.length);
+            pointsList[i] = new Point(Integer.parseInt(pointCoord[0].trim()), Integer.parseInt(pointCoord[1].trim()));
+        }
+
+        for (Point p: pointsList) { p.draw(); System.out.println(p.toString()); }
+
+        System.out.println("########## sort using compareTo() ##########");
+        Arrays.sort(pointsList);
+        for (Point p : pointsList) { System.out.println(p.toString()); }
+
+        System.out.println("########## sort using BySlope() from point " +  pointsList[pointsList.length - 1].toString() + "##########");
+        for (Point p : pointsList) { System.out.println(p.slopeTo(pointsList[pointsList.length - 1])); }
+        Arrays.sort(pointsList, pointsList[pointsList.length - 1 ].slopeOrder());
+        for (Point p : pointsList) { System.out.println(p.toString()); p.drawTo(pointsList[pointsList.length - 1]); }
+
     }
 }
