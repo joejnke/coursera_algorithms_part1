@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 public class FastCollinearPoints {
     private LineSegment[] ls4List;
+    private Point[] pointsFCP;
     // private int numPoints;
     // private int numlines;
 
@@ -21,14 +22,16 @@ public class FastCollinearPoints {
     public FastCollinearPoints(Point[] points) {
         if (points == null) { throw new IllegalArgumentException("null constructor argument not allowed..."); }
 
-        for (Point p : points) {
+        this.pointsFCP = points.clone();
+
+        for (Point p : pointsFCP) {
             if (p == null) { throw new IllegalArgumentException("constructor argument contains null points..."); }
         }
 
-        Arrays.sort(points);
-        if (points.length > 1) {
-            for (int i = 0, j = 1; j < points.length; i++, j++) {
-                if (points[i].compareTo(points[j]) == 0) { throw new IllegalArgumentException("constructor argument contains repeated points..."); }
+        Arrays.sort(pointsFCP);
+        if (pointsFCP.length > 1) {
+            for (int i = 0, j = 1; j < pointsFCP.length; i++, j++) {
+                if (pointsFCP[i].compareTo(pointsFCP[j]) == 0) { throw new IllegalArgumentException("constructor argument contains repeated points..."); }
             }
         }
 
@@ -81,103 +84,106 @@ public class FastCollinearPoints {
         //     System.out.println("out######### " + p.toString() + " ##########");
         // }
 
-        for (Point centerPoint : points) {
-            Point[] tempPoints = points.clone();
+        if (pointsFCP.length >= 4) {
+            for (Point centerPoint : pointsFCP) {
+                Point[] tempPoints = pointsFCP.clone();
 
-            // sort with slope order relative to centerPoint
-            Arrays.sort(tempPoints, centerPoint.slopeOrder());
+                // sort with slope order relative to centerPoint
+                Arrays.sort(tempPoints, centerPoint.slopeOrder());
 
-            /* assuming there are atleast four points in the point list */
-            Point[] tempLineStartEnd = new Point[]{centerPoint, tempPoints[1]};
-            // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
-            Arrays.sort(tempLineStartEnd);
+                /* assuming there are atleast four points in the point list */
+                Point[] tempLineStartEnd = new Point[]{centerPoint, tempPoints[1]};
+                // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
+                Arrays.sort(tempLineStartEnd);
 
-            Point lineStart = tempLineStartEnd[0]; // set to minimum of centerPoint and tempPoints[1]
-            Point lineEnd = tempLineStartEnd[1]; // set to maximum of centerPoint and tempPoints[1]
-            double refSlope = centerPoint.slopeTo(tempPoints[1]);
-            int numCollPoints = 2;
+                Point lineStart = tempLineStartEnd[0]; // set to minimum of centerPoint and tempPoints[1]
+                Point lineEnd = tempLineStartEnd[1]; // set to maximum of centerPoint and tempPoints[1]
+                double refSlope = centerPoint.slopeTo(tempPoints[1]);
+                int numCollPoints = 2;
 
-            // System.out.println("########## center point updated to " + centerPoint.toString() + " #########");
-            for (int i = 2; i < tempPoints.length; i++) {
-                if (Double.compare(centerPoint.slopeTo(tempPoints[i]), refSlope) == 0) {
-                    lineEnd = tempPoints[i];
-                    numCollPoints++;
-                    // System.out.println("########## line segment sequence end updated to " + lineEnd.toString() + " #########");
-                }
-
-                else if (numCollPoints >= 4) {
-                    // set lineStart and lineEnd the right value.
-                    tempLineStartEnd[0] = centerPoint;
-                    tempLineStartEnd[1] = lineEnd;
-                    // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
-                    Arrays.sort(tempLineStartEnd);
-
-                    // form and store the line segment
-                    LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
-                    if (!als4Str.contains(toAdd.toString())) {
-                        als4Str.add(toAdd.toString());
-                        als4.add(toAdd);
-                        // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                // System.out.println("########## center point updated to " + centerPoint.toString() + " #########");
+                for (int i = 2; i < tempPoints.length; i++) {
+                    if (Double.compare(centerPoint.slopeTo(tempPoints[i]), refSlope) == 0) {
+                        lineEnd = tempPoints[i];
+                        numCollPoints++;
+                        // System.out.println("########## line segment sequence end updated to " + lineEnd.toString() + " #########");
                     }
-                    // else {
-                    //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
-                    // }
-                    // this.als4.add(new LineSegment(lineStart, tempLineStartEnd[1]));
-                    // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
 
-                    // reset numCollPoints to 2
-                    numCollPoints = 2;
+                    else if (numCollPoints >= 4) {
+                        // set lineStart and lineEnd the right value.
+                        tempLineStartEnd[0] = centerPoint;
+                        tempLineStartEnd[1] = lineEnd;
+                        // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
+                        Arrays.sort(tempLineStartEnd);
 
-                    // update refSlope to slope of center point and point i
-                    refSlope = centerPoint.slopeTo(tempPoints[i]);
-
-                    // reset lineStart and lineEnd -- to whom? encapsulate the code below into a method
-                    tempLineStartEnd[0] = centerPoint;
-                    tempLineStartEnd[1] = tempPoints[i];
-                    Arrays.sort(tempLineStartEnd);
-                    lineStart = tempLineStartEnd[0];
-                    lineEnd = tempLineStartEnd[1];
-                }
-
-                else {
-                    // reset numCollPoints to 2
-                    numCollPoints = 2;
-
-                    // update refSlope to slope of center point and point i (index of the next collinear sequence begin point)
-                    refSlope = centerPoint.slopeTo(tempPoints[i]);
-
-                    // reset lineStart and lineEnd -- to whom? encapsulate the code below into
-                    // a method named resetSequence(Point centerPoint, int sequenceStart)
-                    tempLineStartEnd[0] = centerPoint;
-                    tempLineStartEnd[1] = tempPoints[i];
-                    Arrays.sort(tempLineStartEnd);
-                    lineStart = tempLineStartEnd[0];
-                    lineEnd = tempLineStartEnd[1];
-                    // System.out.println("########## line segment reseted to start from" + tempPoints[i].toString() + " #########");
-                }
-
-                // if there is only one line segment where all the points are collinear
-                // or if the final point is reached while the sequence containes long enough collinear points.
-                if (numCollPoints >= 4 && (i + 1) == points.length) {
-                    // set lineStart and lineEnd the right value.
-                    tempLineStartEnd[0] = centerPoint;
-                    tempLineStartEnd[1] = lineEnd;
-                    // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
-                    Arrays.sort(tempLineStartEnd);
-
-                    // form and store the line segment
-                    LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
-                    if (!als4Str.contains(toAdd.toString())) {
-                        als4Str.add(toAdd.toString());
-                        als4.add(toAdd);
+                        // form and store the line segment
+                        LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
+                        if (!als4Str.contains(toAdd.toString())) {
+                            als4Str.add(toAdd.toString());
+                            als4.add(toAdd);
+                            // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                        }
+                        // else {
+                        //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
+                        // }
+                        // this.als4.add(new LineSegment(lineStart, tempLineStartEnd[1]));
                         // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+
+                        // reset numCollPoints to 2
+                        numCollPoints = 2;
+
+                        // update refSlope to slope of center point and point i
+                        refSlope = centerPoint.slopeTo(tempPoints[i]);
+
+                        // reset lineStart and lineEnd -- to whom? encapsulate the code below into a method
+                        tempLineStartEnd[0] = centerPoint;
+                        tempLineStartEnd[1] = tempPoints[i];
+                        Arrays.sort(tempLineStartEnd);
+                        lineStart = tempLineStartEnd[0];
+                        lineEnd = tempLineStartEnd[1];
                     }
-                    // else {
-                    //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
-                    // }
+
+                    else {
+                        // reset numCollPoints to 2
+                        numCollPoints = 2;
+
+                        // update refSlope to slope of center point and point i (index of the next collinear sequence begin point)
+                        refSlope = centerPoint.slopeTo(tempPoints[i]);
+
+                        // reset lineStart and lineEnd -- to whom? encapsulate the code below into
+                        // a method named resetSequence(Point centerPoint, int sequenceStart)
+                        tempLineStartEnd[0] = centerPoint;
+                        tempLineStartEnd[1] = tempPoints[i];
+                        Arrays.sort(tempLineStartEnd);
+                        lineStart = tempLineStartEnd[0];
+                        lineEnd = tempLineStartEnd[1];
+                        // System.out.println("########## line segment reseted to start from" + tempPoints[i].toString() + " #########");
+                    }
+
+                    // if there is only one line segment where all the points are collinear
+                    // or if the final point is reached while the sequence containes long enough collinear points.
+                    if (numCollPoints >= 4 && (i + 1) == pointsFCP.length) {
+                        // set lineStart and lineEnd the right value.
+                        tempLineStartEnd[0] = centerPoint;
+                        tempLineStartEnd[1] = lineEnd;
+                        // after sorted, tempLineStartEnd[0] will be start of the line segment and tempLineStartEnd[1] will be end of the line segment
+                        Arrays.sort(tempLineStartEnd);
+
+                        // form and store the line segment
+                        LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
+                        if (!als4Str.contains(toAdd.toString())) {
+                            als4Str.add(toAdd.toString());
+                            als4.add(toAdd);
+                            // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                        }
+                        // else {
+                        //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
+                        // }
+                    }
                 }
             }
         }
+
 
         this.ls4List = new LineSegment[als4.size()];
         for (int i = 0; i < als4.size(); i++) {
@@ -298,7 +304,7 @@ public class FastCollinearPoints {
         // for (int i = 0; i < this.als4.size(); i++) {
         //     this.ls4List[i] = this.als4.get(i);
         // }
-        return this.ls4List; //(LineSegment[]) this.ls4.toArray();
+        return this.ls4List.clone(); //(LineSegment[]) this.ls4.toArray();
     }
 
     public static void main(String[] args) {
