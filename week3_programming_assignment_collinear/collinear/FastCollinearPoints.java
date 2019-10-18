@@ -12,14 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class FastCollinearPoints {
-    private ArrayList<LineSegment> als4;
     private LineSegment[] ls4List;
-    private int numPoints;
-    private int numlines;
+    // private int numPoints;
+    // private int numlines;
 
 
     // finds all line segments containing 4 or more points
-    @SuppressWarnings("checkstyle:NestedIfDepth")
     public FastCollinearPoints(Point[] points) {
         if (points == null) { throw new IllegalArgumentException("null constructor argument not allowed..."); }
 
@@ -36,8 +34,9 @@ public class FastCollinearPoints {
 
         // if (points[0].compareTo(points[1]) == 0) { throw new IllegalArgumentException("constructor argument contains repeated points..."); }
 
-        this.numlines = 0;
-        this.als4 = new ArrayList<LineSegment>();
+        // this.numlines = 0;
+        ArrayList<LineSegment> als4 = new ArrayList<LineSegment>();
+        ArrayList<String> als4Str = new ArrayList<String>();
         // this.ls4List = new LineSegment[points.length * points.length];
 
         // if (points.length >= 4) {
@@ -78,9 +77,9 @@ public class FastCollinearPoints {
         //
         // }
 
-        for (Point p : points) {
-            System.out.println("out######### " + p.toString() + " ##########");
-        }
+        // for (Point p : points) {
+        //     System.out.println("out######### " + p.toString() + " ##########");
+        // }
 
         for (Point centerPoint : points) {
             Point[] tempPoints = points.clone();
@@ -98,12 +97,12 @@ public class FastCollinearPoints {
             double refSlope = centerPoint.slopeTo(tempPoints[1]);
             int numCollPoints = 2;
 
-            System.out.println("########## center point updated to " + centerPoint.toString() + " #########");
+            // System.out.println("########## center point updated to " + centerPoint.toString() + " #########");
             for (int i = 2; i < tempPoints.length; i++) {
                 if (Double.compare(centerPoint.slopeTo(tempPoints[i]), refSlope) == 0) {
                     lineEnd = tempPoints[i];
                     numCollPoints++;
-                    System.out.println("########## line segment sequence end updated to " + lineEnd.toString() + " #########");
+                    // System.out.println("########## line segment sequence end updated to " + lineEnd.toString() + " #########");
                 }
 
                 else if (numCollPoints >= 4) {
@@ -114,8 +113,17 @@ public class FastCollinearPoints {
                     Arrays.sort(tempLineStartEnd);
 
                     // form and store the line segment
-                    this.als4.add(new LineSegment(lineStart, tempLineStartEnd[1]));
-                    System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                    LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
+                    if (!als4Str.contains(toAdd.toString())) {
+                        als4Str.add(toAdd.toString());
+                        als4.add(toAdd);
+                        // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                    }
+                    // else {
+                    //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
+                    // }
+                    // this.als4.add(new LineSegment(lineStart, tempLineStartEnd[1]));
+                    // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
 
                     // reset numCollPoints to 2
                     numCollPoints = 2;
@@ -145,7 +153,7 @@ public class FastCollinearPoints {
                     Arrays.sort(tempLineStartEnd);
                     lineStart = tempLineStartEnd[0];
                     lineEnd = tempLineStartEnd[1];
-                    System.out.println("########## line segment reseted to start from" + tempPoints[i].toString() + " #########");
+                    // System.out.println("########## line segment reseted to start from" + tempPoints[i].toString() + " #########");
                 }
 
                 // if there is only one line segment where all the points are collinear
@@ -158,15 +166,22 @@ public class FastCollinearPoints {
                     Arrays.sort(tempLineStartEnd);
 
                     // form and store the line segment
-                    this.als4.add(new LineSegment(lineStart, tempLineStartEnd[1]));
-                    System.out.println("########## single line segment created #########");
+                    LineSegment toAdd = new LineSegment(lineStart, tempLineStartEnd[1]);
+                    if (!als4Str.contains(toAdd.toString())) {
+                        als4Str.add(toAdd.toString());
+                        als4.add(toAdd);
+                        // System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " created #########");
+                    }
+                    // else {
+                    //     System.out.println("########## line segment " + lineStart.toString() + " -> " + tempLineStartEnd[1].toString() + " exists #########");
+                    // }
                 }
             }
         }
 
-        this.ls4List = new LineSegment[this.als4.size()];
-        for (int i = 0; i < this.als4.size(); i++) {
-            this.ls4List[i] = this.als4.get(i);
+        this.ls4List = new LineSegment[als4.size()];
+        for (int i = 0; i < als4.size(); i++) {
+            this.ls4List[i] = als4.get(i);
         }
 
         // if (points.length >= 4) {
