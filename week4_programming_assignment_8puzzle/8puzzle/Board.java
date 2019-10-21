@@ -66,7 +66,8 @@ public class Board {
             for (int j = 0; j < this.n; j++) {
                 if (this.tiles[i][j] != 0) {
                     System.out.println(manhattanDist + " " + "+= Math.abs((" + i + " + " + j + ") - ((" + this.tiles[i][j] + " - 1 ) / " + this.n + " + ((" + this.tiles[i][j] + " - 1) % " + this.n + ")))");
-                    manhattanDist += Math.abs((i + j) - ((this.tiles[i][j] - 1) / this.n + ((this.tiles[i][j] - 1) % this.n)));
+                    manhattanDist += Math.abs(i - (this.tiles[i][j] - 1) / this.n) + Math.abs(j - (this.tiles[i][j] - 1) % this.n);
+                    // manhattanDist += Math.abs((i + j) - ((this.tiles[i][j] - 1) / this.n + ((this.tiles[i][j] - 1) % this.n)));
                     System.out.println("manhattanDist: " + manhattanDist + "\n");
                 }
             }
