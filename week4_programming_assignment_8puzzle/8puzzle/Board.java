@@ -5,7 +5,6 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdRandom;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,10 +64,9 @@ public class Board {
         for (int i = 0; i < this.n; i++) {
             for (int j = 0; j < this.n; j++) {
                 if (this.tiles[i][j] != 0) {
-                    System.out.println(manhattanDist + " " + "+= Math.abs((" + i + " + " + j + ") - ((" + this.tiles[i][j] + " - 1 ) / " + this.n + " + ((" + this.tiles[i][j] + " - 1) % " + this.n + ")))");
+                    // System.out.println(manhattanDist + " " + "+= Math.abs((" + i + " + " + j + ") - ((" + this.tiles[i][j] + " - 1 ) / " + this.n + " + ((" + this.tiles[i][j] + " - 1) % " + this.n + ")))");
                     manhattanDist += Math.abs(i - (this.tiles[i][j] - 1) / this.n) + Math.abs(j - (this.tiles[i][j] - 1) % this.n);
-                    // manhattanDist += Math.abs((i + j) - ((this.tiles[i][j] - 1) / this.n + ((this.tiles[i][j] - 1) % this.n)));
-                    System.out.println("manhattanDist: " + manhattanDist + "\n");
+                    // System.out.println("manhattanDist: " + manhattanDist + "\n");
                 }
             }
         }
@@ -91,18 +89,18 @@ public class Board {
         if (this.n != that.n) return false;
 
         // check if every row is equal
-        for (int i = 0; i < this.n; i++) {
-            if (!Arrays.equals(this.tiles[i], that.tiles[i])) return  false;
-        }
+        // for (int i = 0; i < this.n; i++) {
+        //     if (!Arrays.equals(this.tiles[i], that.tiles[i])) return  false;
+        // }
 
-        return true;
+        return Arrays.deepEquals(this.tiles, that.tiles);
     }
 
-    private class BoardSet implements Iterable<Board> {
+    private class NeighbourBoardSet implements Iterable<Board> {
         private final ArrayList<Board> neighbours = new ArrayList<Board>();
 
         // find all the neighbours of the constructor argument board and fill them into neighbours array.
-        public BoardSet(Board board) {
+        public NeighbourBoardSet(Board board) {
             int row0 = 0;
             int col0 = 0;
 
@@ -197,34 +195,55 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        return new BoardSet(this);
+        return new NeighbourBoardSet(this);
     }
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
         int temp;
-        int h = StdRandom.uniform(this.n);
-        int j = StdRandom.uniform(this.n);
-        int k = StdRandom.uniform(this.n);
-        int m = StdRandom.uniform(this.n);
-
         int[][] twinTile = new int[this.n][this.n];
+
+        // Random rand = new Random();
+        int h = this.n - 1;
+        int j = this.n - 1;
+        int k = 0;
+        int m = 0;
+
         for (int i = 0; i < this.n; i++) {
             twinTile[i] = Arrays.copyOf(this.tiles[i], this.n);
         }
 
-        if (twinTile[h][j] == 0) {
-            temp = twinTile[++h][j];
-        }
+        if (twinTile[h][j] == 0) { h--; }
+        else if (twinTile[k][m] == 0) { k++; }
 
-        else { temp = twinTile[h][j]; }
-
-        if (twinTile[k][m] == 0) {
-            twinTile[h][j] = twinTile[++k][m];
-        }
-
-        else { twinTile[h][j] = twinTile[k][m]; }
+        temp = twinTile[h][j];
+        twinTile[h][j] = twinTile[k][m];
         twinTile[k][m] = temp;
+
+        // while ((h == k && j == m) || twinTile[h][j] == 0 || twinTile[k][m] == 0) {
+        //     Random rand2 = new Random();
+        //     h = rand2.nextInt(this.n);
+        //     j = rand2.nextInt(this.n);
+        //     k = rand2.nextInt(this.n);
+        //     m = rand2.nextInt(this.n);
+        // }
+        //
+        // temp = twinTile[h][j];
+        // twinTile[h][j] = twinTile[k][m];
+        // twinTile[k][m] = temp;
+
+        // if (twinTile[h][j] == 0) {
+        //     temp = twinTile[++h][j];
+        // }
+        //
+        // else { temp = twinTile[h][j]; }
+        //
+        // if (twinTile[k][m] == 0) {
+        //     twinTile[h][j] = twinTile[++k][m];
+        // }
+        //
+        // else { twinTile[h][j] = twinTile[k][m]; }
+        // twinTile[k][m] = temp;
 
         return new Board(twinTile);
     }
