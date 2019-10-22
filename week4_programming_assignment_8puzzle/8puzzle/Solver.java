@@ -30,13 +30,15 @@ public class Solver {
         class SearchNode implements Comparable<SearchNode> {
             private Board board;
             private SearchNode prevSearchNode;
+            private int numMoves;
             private int manhattanPriority;
 
             // initialize the search board with the requiered attribute values
             public SearchNode(Board board, int numMoves, SearchNode prevSearchNode) {
                 this.board = board;
                 this.prevSearchNode = prevSearchNode;
-                this.manhattanPriority = numMoves + this.board.manhattan();
+                this.numMoves = numMoves;
+                this.manhattanPriority = this.numMoves + this.board.manhattan();
             }
 
             // compare a SearchNode using the manhattan priority function
@@ -60,9 +62,9 @@ public class Solver {
         MinPQ<SearchNode> mpq = new MinPQ<SearchNode>();
         MinPQ<SearchNode> twinMpq = new MinPQ<SearchNode>();
 
-        mpq.insert(new SearchNode(this.initial, this.numMoves, null));
+        mpq.insert(new SearchNode(this.initial, 0, null));
 
-        twinMpq.insert(new SearchNode(twinInitial, this.twinNumMoves, null));
+        twinMpq.insert(new SearchNode(twinInitial, 0, null));
 
         // A* search
         // untill either of initial or twin board is solved
@@ -76,21 +78,21 @@ public class Solver {
             }
 
             else {
-                this.numMoves++;
+                // this.numMoves++;
                 gameTree.add(temp);
 
                 if (temp.prevSearchNode == null) {
                     for (Board brd : temp.board.neighbors()) {
-                        gameTree.add(new SearchNode(brd, this.numMoves, temp));
-                        mpq.insert(new SearchNode(brd, this.numMoves, temp));
+                        gameTree.add(new SearchNode(brd, temp.numMoves + 1, temp));
+                        mpq.insert(new SearchNode(brd, temp.numMoves + 1, temp));
                     }
                 }
 
                 else {
                     for (Board brd : temp.board.neighbors()) {
                         if (!brd.equals(temp.prevSearchNode.board)) {
-                            gameTree.add(new SearchNode(brd, this.numMoves, temp));
-                            mpq.insert(new SearchNode(brd, this.numMoves, temp));
+                            gameTree.add(new SearchNode(brd, temp.numMoves + 1, temp));
+                            mpq.insert(new SearchNode(brd, temp.numMoves + 1, temp));
                         }
                     }
                 }
@@ -102,20 +104,20 @@ public class Solver {
             }
 
             else {
-                this.twinNumMoves++;
+                // this.twinNumMoves++;
                 twinGameTree.add(twinTemp);
                 if (twinTemp.prevSearchNode == null) {
                     for (Board brd : twinTemp.board.neighbors()) {
-                        twinGameTree.add(new SearchNode(brd, this.twinNumMoves, twinTemp));
-                        twinMpq.insert(new SearchNode(brd, this.twinNumMoves, twinTemp));
+                        twinGameTree.add(new SearchNode(brd, twinTemp.numMoves + 1, twinTemp));
+                        twinMpq.insert(new SearchNode(brd, twinTemp.numMoves + 1, twinTemp));
                     }
                 }
 
                 else {
                     for (Board brd : twinTemp.board.neighbors()) {
                         if (!brd.equals(twinTemp.prevSearchNode.board)) {
-                            twinGameTree.add(new SearchNode(brd, this.twinNumMoves, twinTemp));
-                            twinMpq.insert(new SearchNode(brd, this.twinNumMoves, twinTemp));
+                            twinGameTree.add(new SearchNode(brd, twinTemp.numMoves + 1, twinTemp));
+                            twinMpq.insert(new SearchNode(brd, twinTemp.numMoves + 1, twinTemp));
                         }
                     }
                 }
@@ -123,7 +125,11 @@ public class Solver {
         }
 
         // fill the boards in the solution path to a queue of boards
-        SearchNode currentSearchNode = gameTree.get(gameTree.size() - 1); // search node with the goal board
+        SearchNode currentSearchNode = gameTree.get(gameTree.size() - 1); // searchNode with the goal board
+
+        if (this.solvable) this.numMoves = currentSearchNode.manhattanPriority; // since manhattan = moves for the goal board
+        else this.numMoves = -1;
+
         while (currentSearchNode.prevSearchNode != null) {
             this.solnStack.push(currentSearchNode.board);
             currentSearchNode = currentSearchNode.prevSearchNode;
@@ -144,7 +150,8 @@ public class Solver {
 
     // sequence of boards in a shortest solution
     public Iterable<Board> solution() {
-        return this.solnStack; // check if it breaks immutability
+        if (this.solvable) return this.solnStack; // check if it breaks immutability
+        else return null;
     }
 
     // test client
