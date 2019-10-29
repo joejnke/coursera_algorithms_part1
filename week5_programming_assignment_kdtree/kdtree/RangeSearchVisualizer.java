@@ -24,7 +24,7 @@ public class RangeSearchVisualizer {
         // initialize the data structures from file
         String filename = args[0];
         In in = new In(filename);
-        PointSET brute = new PointSET();
+        KdTree brute = new KdTree();
         KdTree kdtree = new KdTree();
         while (!in.isEmpty()) {
             double x = in.readDouble();
