@@ -49,42 +49,50 @@ public class KdTree {
 
     // add the point to the set (if it is not already in the set)
     public void insert(Point2D p) {
-        if (p == null) throw new IllegalArgumentException("calls insert() with a null key...");
+        if (p == null) throw new IllegalArgumentException("calls insert() with a null argument...");
 
         this.root = insert(this.root,
                            new RectHV(0.0, 0.0, 1.0, 1.0),
                            p, true);
+        this.size++;
     }
 
     private Node insert(Node x, RectHV inRect, Point2D point, boolean xOrder) {
         // if the tree is empty and hence root is null
-        if (x == null) return new Node(point,
-                                       inRect, // new RectHV(0.0, 0.0, 1.0, 1.0),
-                                       null, null); // yet to be handled
+        if (x == null) {
+            return new Node(point,
+                            inRect, // new RectHV(0.0, 0.0, 1.0, 1.0),
+                            null, null); // yet to be handled
+        }
 
         // use x as key using X-order comparator of point2D
         if (xOrder) {
             int cmp = Point2D.X_ORDER.compare(point, x.p);
+            /* if the point is equal in the x order then we need to recall insert to this tree again but in y order
+            * x  = insert(x, x.rect, point, true);
+            * */
             if (cmp < 0) x.lb  = insert(x.lb, new RectHV(x.rect.xmin(), x.rect.ymin(), x.p.x(), x.rect.ymax()), point, false);
             else x.rt = insert(x.rt, new RectHV(x.p.x(), x.rect.ymin(), x.rect.xmax(), x.rect.ymax()), point, false);
 
-            this.size++;
             return x;
         }
 
         // use y as key using Y-order comparator of point2D
         else {
             int cmp = Point2D.Y_ORDER.compare(point, x.p);
-            if (cmp < 0) x.lb  = insert(x.rt, new RectHV(x.rect.xmin(), x.rect.ymin(), x.rect.xmax(), x.p.y()), point, true);
+            /* if the point is equal in the y order then we need to recall insert to this tree again but in x order
+             * x  = insert(x, x.rect, point, false);
+             * */
+            if (cmp < 0) x.lb  = insert(x.lb, new RectHV(x.rect.xmin(), x.rect.ymin(), x.rect.xmax(), x.p.y()), point, true);
             else x.rt = insert(x.rt,  new RectHV(x.rect.xmin(), x.p.y(), x.rect.xmax(), x.rect.ymax()), point, true);
 
-            this.size++;
             return x;
         }
     }
 
     // does the set contain point p?
     public boolean contains(Point2D p) {
+        if (p == null) throw new IllegalArgumentException("calls contains() with a null argument...");
         return contains(this.root, p, true);
     }
 
@@ -92,19 +100,22 @@ public class KdTree {
         // if the tree is empty and hence root is null
         if (x == null) return false; // yet to be handled
 
+        // if the root point is equal to query point
+        if (x.p.equals(point)) return true;
+
         // use x as key using X-order comparator of point2D
         if (xOrder) {
             int cmp = Point2D.X_ORDER.compare(point, x.p);
-            if (cmp == 0) return true;
-            else if (cmp < 0) return contains(x.lb, point, false);
+            // if (cmp == 0) return true;
+            if (cmp < 0) return contains(x.lb, point, false);
             else return contains(x.rt, point, false);
         }
 
         // use y as key using Y-order comparator of point2D
         else {
             int cmp = Point2D.Y_ORDER.compare(point, x.p);
-            if (cmp == 0) return true;
-            else if (cmp < 0) return contains(x.rt, point, true);
+            // if (cmp == 0) return true;
+            if (cmp < 0) return contains(x.lb, point, true);
             else return contains(x.rt, point, true);
         }
     }
@@ -148,6 +159,7 @@ public class KdTree {
 
     // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
+        if (rect == null) throw new IllegalArgumentException("calls range() with a null argument...");
         return range(this.root, rect);
     }
 
@@ -157,17 +169,22 @@ public class KdTree {
 
         // if rect intersects the tree rooted at x
         if (rect.intersects(x.rect)) {
-            pointInRect.add(x.p);
+            if (rect.contains(x.p)) pointInRect.add(x.p);
 
-            // if rect intersects with the left subtree of node x
-            if (x.lb != null && rect.intersects(x.lb.rect)) {
-                pointInRect.addAll((ArrayList<Point2D>) range(x.lb, rect));
-            }
+            // find range in left subtree
+            pointInRect.addAll((ArrayList<Point2D>) range(x.lb, rect));
+            // find range in right subtree
+            pointInRect.addAll((ArrayList<Point2D>) range(x.rt, rect));
 
-            // if rect intersects with the right subtree of node x
-            if (x.rt != null && rect.intersects(x.rt.rect)) {
-                pointInRect.addAll((ArrayList<Point2D>) range(x.rt, rect));
-            }
+            // // if rect intersects with the left subtree of node x
+            // if (x.lb != null && rect.intersects(x.lb.rect)) {
+            //     pointInRect.addAll((ArrayList<Point2D>) range(x.lb, rect));
+            // }
+            //
+            // // if rect intersects with the right subtree of node x
+            // if (x.rt != null && rect.intersects(x.rt.rect)) {
+            //     pointInRect.addAll((ArrayList<Point2D>) range(x.rt, rect));
+            // }
         }
 
         return pointInRect;
@@ -175,6 +192,8 @@ public class KdTree {
 
     // a nearest neighbor in the set to point p; null if the set is empty
     public Point2D nearest(Point2D p) {
+        if (p == null) throw new IllegalArgumentException("calls nearest() with a null argument...");
+        p.theta();
         return nearest(this.root, p);
     }
 
@@ -186,26 +205,114 @@ public class KdTree {
         Point2D nearest = x.p;
         if (x.lb == null && x.rt == null) return nearest;
 
-        // find nearest point in the left subtree
-        if (x.lb != null && !(Double.compare(p.distanceSquaredTo(nearest), x.lb.rect.distanceSquaredTo(p)) < 0)) {
-            Point2D tempNear = nearest(x.lb, p);
-            if (Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
-                nearest = tempNear;
-            }
-        }
-
-        // find nearest point in the right subtree
-        if (x.rt != null && !(Double.compare(p.distanceSquaredTo(nearest), x.rt.rect.distanceSquaredTo(p)) < 0)) {
+        // if not possible to go left, then go right
+        if (x.lb == null || Double.compare(p.distanceSquaredTo(nearest), x.lb.rect.distanceSquaredTo(p)) < 0) {
             Point2D tempNear = nearest(x.rt, p);
-            if (Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+            if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
                 nearest = tempNear;
+            }
+
+            return nearest;
+        }
+
+        // if not possible to go right, then go left
+        if (x.rt == null || Double.compare(p.distanceSquaredTo(nearest), x.rt.rect.distanceSquaredTo(p)) < 0) {
+            Point2D tempNear = nearest(x.lb, p);
+            if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+                nearest = tempNear;
+            }
+
+            return nearest;
+        }
+
+        // if possible to go either way
+        else {
+            double thetaLBMax = new Point2D(x.lb.rect.xmax(), x.lb.rect.ymax()).theta(); // polar angle of (Xmax, Ymax) of x.lb.rect
+            double thetaRootP = x.p.theta(); // polar angle of the tree-root point (i.e x.p)
+            double thetaP = p.theta(); // polar angle of query point
+
+            // check if query point is same side as x.lb or in x.lb, if yes go left then right
+            if (x.lb.rect.contains(p) ||
+                    (((thetaLBMax >= thetaRootP) && !(thetaP <= thetaRootP)) ||
+                            ((thetaLBMax <= thetaRootP) && (thetaP <= thetaRootP)))) {
+
+                // go left
+                Point2D tempNear = nearest(x.lb, p);
+                if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+                    nearest = tempNear;
+                }
+
+                // go right
+                tempNear = nearest(x.rt, p);
+                if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+                    nearest = tempNear;
+                }
+
+                return nearest;
+            }
+
+            // else it's same side as x.rt, hence go right and then left
+            else {
+                // go right
+                Point2D tempNear = nearest(x.rt, p);
+                if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+                    nearest = tempNear;
+                }
+
+                // go left
+                tempNear = nearest(x.lb, p);
+                if (tempNear != null && Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+                    nearest = tempNear;
+                }
+
+                return nearest;
             }
         }
 
-        return nearest;
+
+        // // find nearest point in the left subtree
+        // if (x.lb != null && !(Double.compare(p.distanceSquaredTo(nearest), x.lb.rect.distanceSquaredTo(p)) < 0)) {
+        //     Point2D tempNear = nearest(x.lb, p);
+        //     if (Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+        //         nearest = tempNear;
+        //     }
+        // }
+        //
+        // // find nearest point in the right subtree
+        // if (x.rt != null && !(Double.compare(p.distanceSquaredTo(nearest), x.rt.rect.distanceSquaredTo(p)) < 0)) {
+        //     Point2D tempNear = nearest(x.rt, p);
+        //     if (Double.compare(p.distanceSquaredTo(tempNear), p.distanceSquaredTo(nearest)) < 0) {
+        //         nearest = tempNear;
+        //     }
+        // }
+        //
+        // return nearest;
     }
     // unit testing of the methods (optional)
     public static void main(String[] args) {
+        KdTree testKd = new KdTree();
+        Point2D insertP = new Point2D(0.65, 0.8);
+        RectHV rangeRect = new RectHV(0.576, 0.786,0.818 ,0.817);
+        testKd.insert(insertP);
+        System.out.println("set contains (0.5, 0.56): " + testKd.contains(new Point2D(0.5, 0.56)));
+
+        // In in = new In(args[0]);
+        // while (in.hasNextLine()) { // && !in.readLine().isEmpty()) {
+        //     try {
+        //         Point2D toInsert = new Point2D(in.readDouble(), in.readDouble());
+        //         testKd.insert(toInsert);
+        //         System.out.println(toInsert.toString());
+        //     }
+        //
+        //     catch (NoSuchElementException e) {
+        //         System.out.println(e.toString());
+        //     }
+        //
+        // }
+        // System.out.println("set size is: " +  testKd.size());
+
+        System.out.println("range( " + rangeRect.toString() + " ): " +  testKd.range(rangeRect));
+
 
     }
 }

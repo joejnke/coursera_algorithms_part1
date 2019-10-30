@@ -19,15 +19,18 @@ public class KdTreeVisualizer {
         RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
         StdDraw.enableDoubleBuffering();
         KdTree kdtree = new KdTree();
+        int i = 0; // mine
         while (true) {
             if (StdDraw.isMousePressed()) {
                 double x = StdDraw.mouseX();
                 double y = StdDraw.mouseY();
-                StdOut.printf("%8.6f %8.6f\n", x, y);
+                StdOut.printf("i = " + i + " before insert: %8.6f %8.6f\n", x, y); // mine
                 Point2D p = new Point2D(x, y);
                 if (rect.contains(p)) {
-                    StdOut.printf("%8.6f %8.6f\n", x, y);
+                    // StdOut.printf("%8.6f %8.6f\n", x, y);
                     kdtree.insert(p);
+                    i++; // mine
+                    StdOut.printf("i = " + i + " after insert: %8.6f %8.6f\n", x, y); // mine
                     StdDraw.clear();
                     kdtree.draw();
                     StdDraw.show();
